@@ -1,0 +1,19 @@
+name = "cpa-cf-usage"
+main = "src/worker.ts"
+compatibility_date = "2026-05-16"
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+POLL_COUNT = "100"
+POLL_BATCHES = "5"
+# Defaults to: Authorization: Bearer <CPA_MANAGEMENT_KEY>
+# If your CPA fork expects X-API-Key, set:
+# CPA_AUTH_HEADER = "X-API-Key"
+# CPA_AUTH_SCHEME = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cpa_usage"
+database_id = "affa7678-b815-40a5-a3b2-c54dd2029a31"

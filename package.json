@@ -1,0 +1,22 @@
+{
+  "name": "cpa-cf-usage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Workers + D1 usage collector for CLIProxyAPI.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create cpa_usage",
+    "db:migrate": "wrangler d1 migrations apply cpa_usage --remote",
+    "db:migrate:local": "wrangler d1 migrations apply cpa_usage --local",
+    "secret:cpa-url": "wrangler secret put CPA_BASE_URL",
+    "secret:cpa-key": "wrangler secret put CPA_MANAGEMENT_KEY",
+    "secret:dashboard-token": "wrangler secret put DASHBOARD_TOKEN"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260510.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.15.2"
+  }
+}
