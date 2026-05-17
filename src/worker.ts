@@ -390,139 +390,391 @@ function corsHeaders(): HeadersInit {
 
 function renderDashboard(): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CPA 用量统计</title>
+  <title>CPA Usage Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Avenir Next', 'Gill Sans', 'Trebuchet MS', 'sans-serif'],
+            serif: ['ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+            mono: ['SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Roboto Mono', 'monospace']
+          },
+          colors: {
+            paper: { DEFAULT: '#F9F6F0', strong: '#FDF8F1', dark: '#141413', 'dark-strong': '#1E1E1E' },
+            ink: { DEFAULT: '#191919', muted: '#6F6156', dark: '#E6E6E6', 'dark-muted': '#A3A3A3' },
+            terra: { DEFAULT: '#DA7756', light: '#E8936F', dark: '#C96442' },
+            teal: { DEFAULT: '#2E6F5E', light: '#3D8F7A' }
+          }
+        }
+      }
+    }
+  <\/script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; background: #f7f8fa; color: #17181c; }
-    main { max-width: 1120px; margin: 0 auto; padding: 28px 18px 48px; }
-    header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 20px; }
-    h1 { font-size: 28px; line-height: 1.2; margin: 0; font-weight: 720; }
-    button, select, input { font: inherit; border: 1px solid #d6d9df; background: #fff; color: inherit; border-radius: 6px; padding: 8px 10px; }
-    button { cursor: pointer; background: #1769e0; color: white; border-color: #1769e0; }
-    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
-    .metric, section { background: #fff; border: 1px solid #e0e3e8; border-radius: 8px; }
-    .metric { padding: 14px; min-width: 0; }
-    .metric span { display: block; color: #626976; font-size: 12px; margin-bottom: 6px; }
-    .metric strong { display: block; font-size: 22px; overflow-wrap: anywhere; }
-    section { padding: 14px; margin-top: 12px; overflow-x: auto; }
-    h2 { font-size: 16px; margin: 0 0 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; border-bottom: 1px solid #eceff3; padding: 8px 6px; white-space: nowrap; }
-    th { color: #626976; font-weight: 600; }
-    .error { color: #b42318; margin-top: 10px; }
-    @media (max-width: 760px) { header { align-items: flex-start; flex-direction: column; } .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (prefers-color-scheme: dark) {
-      body { background: #101216; color: #f4f6f8; }
-      button, select, input, .metric, section { background: #171a21; border-color: #303642; }
-      th, .metric span { color: #aab2c0; }
-      th, td { border-bottom-color: #2a303b; }
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #141413;
+      color: #E6E6E6;
+      font-family: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+      line-height: 1.6;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+      background-size: 20px 20px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body > div { position: relative; z-index: 1; }
+
+    .card {
+      background: #1E1E1E;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.625rem;
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .stat-card { position: relative; overflow: hidden; transition: all 0.2s ease; }
+    .stat-card:hover { transform: translateY(-1px); }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-color, #DA7756), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .stat-card:hover::after { opacity: 1; }
+
+    .btn-primary {
+      background: #DA7756;
+      color: #F9F6F0;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: #C96442; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(218,119,86,0.25); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      background: transparent;
+      color: #A3A3A3;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); color: #E6E6E6; border-color: rgba(255,255,255,0.2); }
+
+    select, input[type="password"] {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #E6E6E6;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input[type="password"]:focus {
+      border-color: #DA7756;
+      box-shadow: 0 0 0 2px rgba(218,119,86,0.15);
+    }
+    select { appearance: none; cursor: pointer; }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+    th {
+      color: #A3A3A3;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      white-space: nowrap;
+      color: #E6E6E6;
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-success { background: rgba(46,111,94,0.2); color: #3D8F7A; }
+    .badge-error { background: rgba(218,119,86,0.15); color: #E8936F; }
+    .badge-neutral { background: rgba(163,163,163,0.1); color: #A3A3A3; }
+
+    .error-toast {
+      background: rgba(218,119,86,0.08);
+      border: 1px solid rgba(218,119,86,0.2);
+      color: #E8936F;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+    }
+
+    .section-title {
+      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: #E6E6E6;
+      letter-spacing: -0.01em;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.85; }
+    }
+    .shimmer { animation: shimmer 2s ease-in-out infinite; }
+
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .toolbar { flex-direction: column; align-items: stretch !important; }
     }
   </style>
 </head>
-<body>
-  <main>
-    <header>
-      <h1>CPA 用量统计</h1>
-      <div class="toolbar">
-        <select id="range">
-          <option value="24h">24h</option>
-          <option value="7d" selected>7d</option>
-          <option value="30d">30d</option>
-          <option value="all">All</option>
+<body class="min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-terra/15 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DA7756" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold tracking-tight" style="font-family:'Avenir Next',Gill Sans,sans-serif;color:#E6E6E6;">CPA Usage</h1>
+          <p class="text-xs" style="color:#A3A3A3;font-family:'Avenir Next',Gill Sans,sans-serif;">CLIProxyAPI 用量统计</p>
+        </div>
+      </div>
+      <div class="toolbar flex items-center gap-2 flex-wrap">
+        <select id="range" class="min-w-[90px]">
+          <option value="1h">1 小时</option>
+          <option value="24h">24 小时</option>
+          <option value="7d" selected>7 天</option>
+          <option value="30d">30 天</option>
+          <option value="90d">90 天</option>
+          <option value="all">全部</option>
         </select>
-        <input id="token" type="password" placeholder="面板令牌">
-        <button id="refresh">刷新</button>
-        <button id="collect">立即采集</button>
+        <input id="token" type="password" placeholder="面板令牌" class="w-36">
+        <button id="refresh" class="btn-secondary flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          刷新
+        </button>
+        <button id="collect" class="btn-primary flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          采集
+        </button>
       </div>
     </header>
-    <div id="error" class="error"></div>
-    <div class="metrics" id="metrics"></div>
-    <section>
-      <h2>按模型</h2>
-      <table id="models"></table>
-    </section>
-    <section>
-      <h2>按来源</h2>
-      <table id="sources"></table>
-    </section>
-    <section>
-      <h2>最近请求</h2>
-      <table id="recent"></table>
-    </section>
-  </main>
+
+    <!-- Error -->
+    <div id="error" class="error-toast mb-5 hidden"></div>
+
+    <!-- Loading -->
+    <div id="loading" class="hidden text-center py-16">
+      <div class="shimmer mx-auto mb-4 w-8 h-8 rounded-full border-2 border-terra/30 border-t-terra"></div>
+      <p class="text-sm" style="color:#A3A3A3;font-family:'Avenir Next',Gill Sans,sans-serif;">加载中...</p>
+    </div>
+
+    <!-- Stats -->
+    <div id="metrics" class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+
+    <!-- Model & Source Tables -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <div class="card p-5 fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="section-title">按模型</h2>
+          <span class="badge badge-neutral" id="model-count">0</span>
+        </div>
+        <div class="overflow-x-auto"><table id="models"></table></div>
+      </div>
+      <div class="card p-5 fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="section-title">按来源</h2>
+          <span class="badge badge-neutral" id="source-count">0</span>
+        </div>
+        <div class="overflow-x-auto"><table id="sources"></table></div>
+      </div>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="card p-5 fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="section-title">最近请求</h2>
+        <span class="badge badge-neutral" id="recent-count">0</span>
+      </div>
+      <div class="overflow-x-auto"><table id="recent"></table></div>
+    </div>
+  </div>
+
   <script>
-    const tokenInput = document.querySelector("#token");
-    const savedToken = localStorage.getItem("dashboardToken");
+    var $ = function(s) { return document.querySelector(s); };
+    var tokenInput = $("#token");
+    var savedToken = localStorage.getItem("dashboardToken");
     if (savedToken) tokenInput.value = savedToken;
 
-    function headers() {
-      const token = tokenInput.value.trim();
+    function getHeaders() {
+      var token = tokenInput.value.trim();
       if (token) localStorage.setItem("dashboardToken", token);
       return token ? { authorization: "Bearer " + token } : {};
     }
 
-    async function api(path, options = {}) {
-      const response = await fetch(path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || response.statusText);
-      return data;
+    function api(path, options) {
+      options = options || {};
+      return fetch(path, { method: options.method, headers: Object.assign({}, getHeaders(), options.headers || {}) })
+        .then(function(res) {
+          return res.json().then(function(data) {
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            return data;
+          });
+        });
     }
 
-    function format(value) {
-      return new Intl.NumberFormat().format(Number(value || 0));
+    function fmt(n) { return new Intl.NumberFormat().format(Number(n || 0)); }
+    function money(n) { return "$" + Number(n || 0).toFixed(4); }
+
+    function icon(name) {
+      var icons = {
+        requests: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+        tokens: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M8 10h8"/></svg>',
+        input: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>',
+        output: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+        cost: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        latency: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        cache: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+        error: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+      };
+      return icons[name] || '';
     }
 
-    function money(value) {
-      return "$" + Number(value || 0).toFixed(4);
+    function statCard(label, value, accentVar, iconKey) {
+      return '<div class="stat-card card p-4 fade-in" style="--accent-color:' + accentVar + '">' +
+        '<div class="flex items-center gap-2 mb-2.5">' +
+          '<span style="color:' + accentVar + '">' + icon(iconKey) + '</span>' +
+          '<span class="text-xs font-medium uppercase tracking-wider" style="color:#A3A3A3;font-family:Avenir Next,Gill Sans,sans-serif;">' + label + '</span>' +
+        '</div>' +
+        '<div class="text-xl font-semibold" style="color:#E6E6E6;font-family:Avenir Next,Gill Sans,sans-serif;">' + value + '</div>' +
+      '</div>';
     }
 
-    function renderMetrics(summary) {
-      const items = [
-        ["请求数", summary.requests],
-        ["总 tokens", summary.total_tokens],
-        ["输入 tokens", summary.input_tokens],
-        ["输出 tokens", summary.output_tokens],
-        ["失败数", summary.failed_requests],
-        ["费用", money(summary.cost_usd)],
-        ["平均延迟", (summary.avg_latency_ms || 0) + " ms"],
-        ["缓存 tokens", summary.cached_tokens]
-      ];
-      document.querySelector("#metrics").innerHTML = items.map(([label, value]) => '<div class="metric"><span>' + label + '</span><strong>' + formatLabel(value) + '</strong></div>').join("");
+    function renderMetrics(s) {
+      $("#metrics").innerHTML = [
+        statCard("请求数", fmt(s.requests), "#DA7756", "requests"),
+        statCard("总 Tokens", fmt(s.total_tokens), "#E8936F", "tokens"),
+        statCard("费用", money(s.cost_usd), "#2E6F5E", "cost"),
+        statCard("平均延迟", Math.round(s.avg_latency_ms || 0) + " ms", "#A3A3A3", "latency"),
+        statCard("输入 Tokens", fmt(s.input_tokens), "#DA7756", "input"),
+        statCard("输出 Tokens", fmt(s.output_tokens), "#E8936F", "output"),
+        statCard("缓存 Tokens", fmt(s.cached_tokens), "#A3A3A3", "cache"),
+        statCard("失败数", fmt(s.failed_requests), "#C96442", "error")
+      ].join("");
     }
 
-    function formatLabel(value) {
-      return typeof value === "number" ? format(value) : String(value ?? 0);
+    function statusBadge(value) {
+      return value == 1
+        ? '<span class="badge badge-success"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3D8F7A;"></span> 成功</span>'
+        : '<span class="badge badge-error"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#E8936F;"></span> 失败</span>';
     }
 
-    function renderTable(selector, columns, rows) {
-      const head = "<thead><tr>" + columns.map((column) => "<th>" + column.label + "</th>").join("") + "</tr></thead>";
-      const body = "<tbody>" + rows.map((row) => "<tr>" + columns.map((column) => "<td>" + formatCell(row[column.key]) + "</td>").join("") + "</tr>").join("") + "</tbody>";
-      document.querySelector(selector).innerHTML = head + body;
+    function renderTable(sel, columns, rows, countId) {
+      if (countId) $(countId).textContent = rows.length;
+      if (!rows.length) {
+        $(sel).innerHTML = '<tbody><tr><td colspan="' + columns.length + '" style="text-align:center;color:#A3A3A3;padding:32px 14px;font-style:italic;">暂无数据</td></tr></tbody>';
+        return;
+      }
+      var head = "<thead><tr>" + columns.map(function(c) { return "<th>" + c.label + "</th>"; }).join("") + "</tr></thead>";
+      var body = "<tbody>" + rows.map(function(row) {
+        return "<tr>" + columns.map(function(c) {
+          if (c.format === "time") return '<td style="color:#A3A3A3;font-family:ui-monospace,monospace;font-size:12px;">' + formatTime(row[c.key]) + "</td>";
+          if (c.key === "success") return "<td>" + statusBadge(row[c.key]) + "</td>";
+          if (c.key === "cost_usd") return '<td style="color:#3D8F7A;font-weight:500;">' + money(row[c.key]) + "</td>";
+          if (c.key === "latency_ms") return '<td style="color:#A3A3A3;font-family:ui-monospace,monospace;font-size:12px;">' + fmt(row[c.key]) + " ms</td>";
+          if (c.key === "total_tokens") return '<td style="font-weight:500;">' + fmt(row[c.key]) + "</td>";
+          return "<td>" + formatCell(row[c.key]) + "</td>";
+        }).join("") + "</tr>";
+      }).join("") + "</tbody>";
+      $(sel).innerHTML = head + body;
     }
 
-    function formatCell(value) {
-      if (typeof value === "number") return format(value);
-      if (value === null || value === undefined) return "";
-      return String(value);
+    function formatCell(v) {
+      if (typeof v === "number") return fmt(v);
+      if (v === null || v === undefined) return '<span style="color:#6F6156;">—</span>';
+      return String(v);
     }
 
-    async function load() {
-      document.querySelector("#error").textContent = "";
-      const range = document.querySelector("#range").value;
-      try {
-        const [summary, models, sources, recent] = await Promise.all([
-          api("/api/summary?range=" + range),
-          api("/api/by-model?range=" + range),
-          api("/api/by-source?range=" + range),
-          api("/api/recent?limit=50")
-        ]);
+    function formatTime(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      if (isNaN(d)) return iso;
+      var pad = function(n) { return String(n).padStart(2, '0'); };
+      return pad(d.getMonth()+1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    function showError(msg) {
+      var el = $("#error");
+      if (msg) { el.textContent = msg; el.classList.remove("hidden"); }
+      else { el.textContent = ""; el.classList.add("hidden"); }
+    }
+
+    function load() {
+      showError("");
+      $("#loading").classList.remove("hidden");
+      var range = $("#range").value;
+      Promise.all([
+        api("/api/summary?range=" + range),
+        api("/api/by-model?range=" + range),
+        api("/api/by-source?range=" + range),
+        api("/api/recent?limit=50")
+      ]).then(function(results) {
+        var summary = results[0], models = results[1], sources = results[2], recent = results[3];
         renderMetrics(summary);
-        const groupedColumns = [
+        var groupedCols = [
           { key: "name", label: "名称" },
           { key: "requests", label: "请求" },
           { key: "input_tokens", label: "输入" },
@@ -530,33 +782,27 @@ function renderDashboard(): string {
           { key: "total_tokens", label: "总量" },
           { key: "cost_usd", label: "费用" }
         ];
-        renderTable("#models", groupedColumns, models);
-        renderTable("#sources", groupedColumns, sources);
+        renderTable("#models", groupedCols, models, "#model-count");
+        renderTable("#sources", groupedCols, sources, "#source-count");
         renderTable("#recent", [
-          { key: "timestamp", label: "时间" },
+          { key: "timestamp", label: "时间", format: "time" },
           { key: "source", label: "来源" },
           { key: "model", label: "模型" },
-          { key: "success", label: "成功" },
+          { key: "success", label: "状态" },
           { key: "total_tokens", label: "Tokens" },
           { key: "latency_ms", label: "延迟" }
-        ], recent);
-      } catch (error) {
-        document.querySelector("#error").textContent = error.message;
-      }
+        ], recent, "#recent-count");
+      }).catch(function(e) { showError(e.message); })
+      .then(function() { $("#loading").classList.add("hidden"); });
     }
 
-    document.querySelector("#refresh").addEventListener("click", load);
-    document.querySelector("#range").addEventListener("change", load);
-    document.querySelector("#collect").addEventListener("click", async () => {
-      try {
-        await api("/api/collect", { method: "POST" });
-        await load();
-      } catch (error) {
-        document.querySelector("#error").textContent = error.message;
-      }
+    $("#refresh").addEventListener("click", load);
+    $("#range").addEventListener("change", load);
+    $("#collect").addEventListener("click", function() {
+      api("/api/collect", { method: "POST" }).then(function() { return load(); }).catch(function(e) { showError(e.message); });
     });
     load();
-  </script>
+  <\/script>
 </body>
 </html>`;
 }
