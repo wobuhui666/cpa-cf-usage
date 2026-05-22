@@ -388,175 +388,450 @@ function corsHeaders(): HeadersInit {
   };
 }
 
+
 function renderDashboard(): string {
-  return `<!doctype html>
-<html lang="en">
+  return `<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CPA 用量统计</title>
-  <style>
-    :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; background: #f7f8fa; color: #17181c; }
-    main { max-width: 1120px; margin: 0 auto; padding: 28px 18px 48px; }
-    header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 20px; }
-    h1 { font-size: 28px; line-height: 1.2; margin: 0; font-weight: 720; }
-    button, select, input { font: inherit; border: 1px solid #d6d9df; background: #fff; color: inherit; border-radius: 6px; padding: 8px 10px; }
-    button { cursor: pointer; background: #1769e0; color: white; border-color: #1769e0; }
-    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
-    .metric, section { background: #fff; border: 1px solid #e0e3e8; border-radius: 8px; }
-    .metric { padding: 14px; min-width: 0; }
-    .metric span { display: block; color: #626976; font-size: 12px; margin-bottom: 6px; }
-    .metric strong { display: block; font-size: 22px; overflow-wrap: anywhere; }
-    section { padding: 14px; margin-top: 12px; overflow-x: auto; }
-    h2 { font-size: 16px; margin: 0 0 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; border-bottom: 1px solid #eceff3; padding: 8px 6px; white-space: nowrap; }
-    th { color: #626976; font-weight: 600; }
-    .error { color: #b42318; margin-top: 10px; }
-    @media (max-width: 760px) { header { align-items: flex-start; flex-direction: column; } .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (prefers-color-scheme: dark) {
-      body { background: #101216; color: #f4f6f8; }
-      button, select, input, .metric, section { background: #171a21; border-color: #303642; }
-      th, .metric span { color: #aab2c0; }
-      th, td { border-bottom-color: #2a303b; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPA Analytics - Gemini Style</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 图标 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Outfit 带来类似 Google Sans 的现代几何感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gemini: {
+                            bg: '#131314',
+                            surface: '#1e1f20',
+                            surfaceHover: '#282a2c',
+                            text: '#e3e3e3',
+                            textSecondary: '#c4c7c5',
+                            border: '#333538'
+                        }
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 10s ease infinite',
+                        'sparkle': 'sparkle 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        'sparkle': {
+                            '0%, 100%': { transform: 'scale(1) rotate(0deg)', opacity: 1 },
+                            '50%': { transform: 'scale(1.1) rotate(5deg)', opacity: 0.8 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #131314;
+            color: #e3e3e3;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 隐藏滚动条但保留功能，类似原生App */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333538; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4d51; }
+
+        /* Gemini 标志性的文字渐变 */
+        .gemini-gradient-text {
+            background: linear-gradient(74deg, #4285f4 0, #9b72cb 46%, #d96570 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+
+        .gemini-gradient-bg {
+            background: linear-gradient(74deg, #4285f4 0, #9b72cb 46%, #d96570 100%);
+        }
+
+        /* 顶部微妙的环境光 */
+        .ambient-light {
+            position: fixed;
+            top: -20vh;
+            left: 10vw;
+            width: 80vw;
+            height: 40vh;
+            background: radial-gradient(ellipse at center, rgba(155, 114, 203, 0.15) 0%, rgba(19, 19, 20, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Gemini 风格的卡片：大圆角，极简背景，无明显边框 */
+        .gemini-card {
+            background-color: #1e1f20;
+            border-radius: 24px;
+            transition: background-color 0.2s ease;
+        }
+        .gemini-card:hover {
+            background-color: #282a2c;
+        }
+
+        /* Gemini 输入框风格（药丸形状，深灰底色） */
+        .gemini-input {
+            background-color: #1e1f20;
+            border: 1px solid transparent;
+            color: #e3e3e3;
+            border-radius: 9999px; /* pill shape */
+            transition: all 0.2s ease;
+        }
+        .gemini-input:focus-within {
+            background-color: #282a2c;
+        }
+        select option { background: #1e1f20; color: #e3e3e3; }
+
+        /* 表格样式重写 */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th {
+            color: #c4c7c5;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 16px;
+            border-bottom: 1px solid #333538;
+            text-align: left;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(51, 53, 56, 0.5);
+            font-size: 0.9rem;
+        }
+        tbody tr { transition: background-color 0.2s ease; }
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* 状态指示器小圆点 */
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+    </style>
 </head>
-<body>
-  <main>
-    <header>
-      <h1>CPA 用量统计</h1>
-      <div class="toolbar">
-        <select id="range">
-          <option value="24h">24h</option>
-          <option value="7d" selected>7d</option>
-          <option value="30d">30d</option>
-          <option value="all">All</option>
-        </select>
-        <input id="token" type="password" placeholder="面板令牌">
-        <button id="refresh">刷新</button>
-        <button id="collect">立即采集</button>
-      </div>
+<body class="antialiased min-h-screen flex flex-col font-sans selection:bg-[#9b72cb] selection:text-white">
+
+    <!-- 顶部环境光 -->
+    <div class="ambient-light"></div>
+
+    <!-- 导航与控制栏 -->
+    <header class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 z-10">
+
+        <!-- Logo / 标题区 -->
+        <div class="flex items-center gap-3">
+            <div class="animate-sparkle">
+                <i data-lucide="sparkles" class="w-8 h-8" style="color: #a47cf6;"></i>
+            </div>
+            <h1 class="text-3xl font-medium tracking-tight">
+                <span class="gemini-gradient-text animate-gradient-x">CPA Analytics</span>
+            </h1>
+        </div>
+
+        <!-- Gemini 风格工具栏 -->
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <!-- 下拉选择 (Pill) -->
+            <div class="relative gemini-input flex items-center px-4 py-2 hover:bg-[#282a2c] cursor-pointer">
+                <select id="range" class="appearance-none bg-transparent outline-none text-sm font-medium pr-6 cursor-pointer w-full h-full text-gemini-textSecondary">
+                    <option value="24h">24 小时</option>
+                    <option value="7d" selected>7 天</option>
+                    <option value="30d">30 天</option>
+                    <option value="all">全部时间</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gemini-textSecondary absolute right-4 pointer-events-none"></i>
+            </div>
+
+            <!-- Token 输入 (Pill) -->
+            <div class="relative flex-1 md:w-56 gemini-input flex items-center px-4 py-2 hover:bg-[#282a2c]">
+                <i data-lucide="key" class="w-4 h-4 text-gemini-textSecondary shrink-0 mr-2"></i>
+                <input id="token" type="password" placeholder="输入面板 Token" class="bg-transparent outline-none w-full text-sm text-gemini-text placeholder-gemini-textSecondary">
+            </div>
+
+            <!-- 操作按钮 (Pill) -->
+            <button id="refresh" class="gemini-input px-5 py-2 flex items-center justify-center hover:bg-[#282a2c] transition-colors group">
+                <i data-lucide="rotate-cw" class="w-4 h-4 text-gemini-textSecondary group-hover:text-white transition-colors"></i>
+            </button>
+
+            <!-- 主色调按钮 -->
+            <button id="collect" class="gemini-gradient-bg px-6 py-2 rounded-full text-white text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg shadow-[#9b72cb]/20 active:scale-95">
+                <i data-lucide="zap" class="w-4 h-4 fill-white/20"></i>
+                <span>立即采集</span>
+            </button>
+        </div>
     </header>
-    <div id="error" class="error"></div>
-    <div class="metrics" id="metrics"></div>
-    <section>
-      <h2>按模型</h2>
-      <table id="models"></table>
-    </section>
-    <section>
-      <h2>按来源</h2>
-      <table id="sources"></table>
-    </section>
-    <section>
-      <h2>最近请求</h2>
-      <table id="recent"></table>
-    </section>
-  </main>
-  <script>
-    const tokenInput = document.querySelector("#token");
-    const savedToken = localStorage.getItem("dashboardToken");
-    if (savedToken) tokenInput.value = savedToken;
 
-    function headers() {
-      const token = tokenInput.value.trim();
-      if (token) localStorage.setItem("dashboardToken", token);
-      return token ? { authorization: "Bearer " + token } : {};
-    }
+    <!-- 主内容区 -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pb-12 space-y-6 z-10">
 
-    async function api(path, options = {}) {
-      const response = await fetch(path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || response.statusText);
-      return data;
-    }
+        <!-- 错误提示 -->
+        <div id="error" class="hidden w-full p-4 rounded-2xl bg-red-500/10 text-red-400 text-sm flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+            <span id="error-text"></span>
+        </div>
 
-    function format(value) {
-      return new Intl.NumberFormat().format(Number(value || 0));
-    }
+        <!-- 欢迎语 (Gemini 标志性大标题) -->
+        <div class="py-4">
+            <h2 class="text-4xl font-medium gemini-gradient-text animate-gradient-x inline-block mb-2">Hello, Admin</h2>
+            <p class="text-gemini-textSecondary text-lg">以下是您最近的 API 调用使用情况。</p>
+        </div>
 
-    function money(value) {
-      return "$" + Number(value || 0).toFixed(4);
-    }
+        <!-- 核心指标网格 -->
+        <div id="metrics" class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+            <!-- JS 动态注入 -->
+        </div>
 
-    function renderMetrics(summary) {
-      const items = [
-        ["请求数", summary.requests],
-        ["总 tokens", summary.total_tokens],
-        ["输入 tokens", summary.input_tokens],
-        ["输出 tokens", summary.output_tokens],
-        ["失败数", summary.failed_requests],
-        ["费用", money(summary.cost_usd)],
-        ["平均延迟", (summary.avg_latency_ms || 0) + " ms"],
-        ["缓存 tokens", summary.cached_tokens]
-      ];
-      document.querySelector("#metrics").innerHTML = items.map(([label, value]) => '<div class="metric"><span>' + label + '</span><strong>' + formatLabel(value) + '</strong></div>').join("");
-    }
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-2">
+            <!-- 按模型 -->
+            <section class="gemini-card p-6 flex flex-col h-full">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <i data-lucide="box" class="w-5 h-5 text-[#9b72cb]"></i>
+                    <h2 class="text-lg font-medium text-white">按模型</h2>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table id="models" class="w-full text-left whitespace-nowrap"></table>
+                </div>
+            </section>
 
-    function formatLabel(value) {
-      return typeof value === "number" ? format(value) : String(value ?? 0);
-    }
+            <!-- 按来源 -->
+            <section class="gemini-card p-6 flex flex-col h-full">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <i data-lucide="globe-2" class="w-5 h-5 text-[#4285f4]"></i>
+                    <h2 class="text-lg font-medium text-white">按来源</h2>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table id="sources" class="w-full text-left whitespace-nowrap"></table>
+                </div>
+            </section>
+        </div>
 
-    function renderTable(selector, columns, rows) {
-      const head = "<thead><tr>" + columns.map((column) => "<th>" + column.label + "</th>").join("") + "</tr></thead>";
-      const body = "<tbody>" + rows.map((row) => "<tr>" + columns.map((column) => "<td>" + formatCell(row[column.key]) + "</td>").join("") + "</tr>").join("") + "</tbody>";
-      document.querySelector(selector).innerHTML = head + body;
-    }
+        <!-- 最近请求 -->
+        <section class="gemini-card p-6">
+            <div class="flex items-center gap-3 mb-4 px-2">
+                <i data-lucide="history" class="w-5 h-5 text-[#d96570]"></i>
+                <h2 class="text-lg font-medium text-white">最近请求记录</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="recent" class="w-full text-left whitespace-nowrap"></table>
+            </div>
+        </section>
 
-    function formatCell(value) {
-      if (typeof value === "number") return format(value);
-      if (value === null || value === undefined) return "";
-      return String(value);
-    }
+    </main>
 
-    async function load() {
-      document.querySelector("#error").textContent = "";
-      const range = document.querySelector("#range").value;
-      try {
-        const [summary, models, sources, recent] = await Promise.all([
-          api("/api/summary?range=" + range),
-          api("/api/by-model?range=" + range),
-          api("/api/by-source?range=" + range),
-          api("/api/recent?limit=50")
-        ]);
-        renderMetrics(summary);
-        const groupedColumns = [
-          { key: "name", label: "名称" },
-          { key: "requests", label: "请求" },
-          { key: "input_tokens", label: "输入" },
-          { key: "output_tokens", label: "输出" },
-          { key: "total_tokens", label: "总量" },
-          { key: "cost_usd", label: "费用" }
-        ];
-        renderTable("#models", groupedColumns, models);
-        renderTable("#sources", groupedColumns, sources);
-        renderTable("#recent", [
-          { key: "timestamp", label: "时间" },
-          { key: "source", label: "来源" },
-          { key: "model", label: "模型" },
-          { key: "success", label: "成功" },
-          { key: "total_tokens", label: "Tokens" },
-          { key: "latency_ms", label: "延迟" }
-        ], recent);
-      } catch (error) {
-        document.querySelector("#error").textContent = error.message;
-      }
-    }
+    <!-- 核心逻辑脚本 -->
+    <script>
+        // 初始化静态图标
+        lucide.createIcons();
 
-    document.querySelector("#refresh").addEventListener("click", load);
-    document.querySelector("#range").addEventListener("change", load);
-    document.querySelector("#collect").addEventListener("click", async () => {
-      try {
-        await api("/api/collect", { method: "POST" });
-        await load();
-      } catch (error) {
-        document.querySelector("#error").textContent = error.message;
-      }
-    });
-    load();
-  </script>
+        const tokenInput = document.querySelector("#token");
+        const savedToken = localStorage.getItem("dashboardToken");
+        if (savedToken) tokenInput.value = savedToken;
+
+        function headers() {
+            const token = tokenInput.value.trim();
+            if (token) localStorage.setItem("dashboardToken", token);
+            return token ? { authorization: "Bearer " + token } : {};
+        }
+
+        async function api(path, options = {}) {
+            const response = await fetch(path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || response.statusText);
+            return data;
+        }
+
+        function format(value) {
+            return new Intl.NumberFormat().format(Number(value || 0));
+        }
+
+        function money(value) {
+            return "\$" + Number(value || 0).toFixed(4);
+        }
+
+        function formatLabel(value) {
+            return typeof value === "number" ? format(value) : String(value ?? 0);
+        }
+
+        function showError(msg) {
+            const errDiv = document.querySelector("#error");
+            const errText = document.querySelector("#error-text");
+            if (msg) {
+                errText.textContent = msg;
+                errDiv.classList.remove("hidden");
+            } else {
+                errDiv.classList.add("hidden");
+                errText.textContent = "";
+            }
+        }
+
+        // ==========================================
+        // UI 渲染逻辑增强：Gemini 风格的指标卡片
+        // ==========================================
+        function renderMetrics(summary) {
+            const items = [
+                { label: "请求总数", value: summary.requests, icon: "activity", desc: "API Calls" },
+                { label: "总 Tokens", value: summary.total_tokens, icon: "coins", desc: "Total Used" },
+                { label: "输入 Tokens", value: summary.input_tokens, icon: "corner-right-down", desc: "Prompt" },
+                { label: "输出 Tokens", value: summary.output_tokens, icon: "corner-right-up", desc: "Completion" },
+                { label: "失败请求", value: summary.failed_requests, icon: "alert-triangle", desc: "Errors" },
+                { label: "总费用", value: money(summary.cost_usd), icon: "badge-dollar-sign", desc: "Estimated" },
+                { label: "平均延迟", value: (summary.avg_latency_ms || 0) + " ms", icon: "timer", desc: "Speed" },
+                { label: "缓存 Tokens", value: summary.cached_tokens, icon: "hard-drive", desc: "Saved" }
+            ];
+
+            const html = items.map(item => '<div class="gemini-card p-5 sm:p-6 flex flex-col justify-between min-h-[120px] group cursor-default relative overflow-hidden">'
+                + '<div class="flex justify-between items-start mb-4">'
+                + '<div class="flex flex-col">'
+                + '<span class="text-gemini-text text-sm font-medium">' + item.label + '</span>'
+                + '<span class="text-gemini-textSecondary text-[11px] uppercase tracking-wider mt-0.5">' + item.desc + '</span>'
+                + '</div>'
+                + '<i data-lucide="' + item.icon + '" class="w-4 h-4 text-gemini-textSecondary group-hover:text-[#9b72cb] transition-colors"></i>'
+                + '</div>'
+                + '<strong class="text-2xl sm:text-3xl font-light font-mono text-white truncate' + (item.label === "失败请求" && item.value > 0 ? ' !text-red-400 font-medium' : '') + '">'
+                + (item.label === "总费用" ? item.value : formatLabel(item.value))
+                + '</strong>'
+                + '</div>'
+            ).join("");
+
+            document.querySelector("#metrics").innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // UI 渲染逻辑增强：Gemini 风格干净的表格
+        // ==========================================
+        function renderTable(selector, columns, rows) {
+            var head = "<thead><tr>" + columns.map(function(column) {
+                return '<th class="' + (column.align === 'right' ? 'text-right' : 'text-left') + '">' + column.label + '</th>';
+            }).join("") + "</tr></thead>";
+
+            var body = "<tbody>" + rows.map(function(row) {
+                return "<tr>" + columns.map(function(column) {
+                    var cellValue = row[column.key];
+                    var displayValue = formatCell(cellValue, column.key);
+                    var tdClass = column.align === 'right' ? 'text-right' : 'text-left';
+
+                    if (column.key === 'success') {
+                        var isSuccess = cellValue === true || cellValue === 1 || cellValue === 'true';
+                        displayValue = isSuccess
+                            ? '<div class="flex items-center gap-2"><span class="status-dot bg-green-500"></span><span class="text-gemini-textSecondary">成功</span></div>'
+                            : '<div class="flex items-center gap-2"><span class="status-dot bg-red-500"></span><span class="text-red-400">失败</span></div>';
+                    } else if (column.key === 'cost_usd' || column.label === '费用') {
+                        displayValue = '<span class="text-gemini-text font-mono">' + displayValue + '</span>';
+                    } else if (column.key === 'name' || column.key === 'model') {
+                        displayValue = '<span class="text-white font-medium">' + displayValue + '</span>';
+                    } else if (column.key === 'source') {
+                        displayValue = '<span class="bg-[#282a2c] px-2.5 py-1 rounded-md text-xs text-gemini-textSecondary border border-[#333538]">' + displayValue + '</span>';
+                    } else if (typeof cellValue === 'number') {
+                        displayValue = '<span class="font-mono text-gemini-textSecondary">' + displayValue + '</span>';
+                    } else {
+                        displayValue = '<span class="text-gemini-textSecondary">' + displayValue + '</span>';
+                    }
+
+                    return '<td class="' + tdClass + '">' + displayValue + '</td>';
+                }).join("") + "</tr>";
+            }).join("") + "</tbody>";
+
+            document.querySelector(selector).innerHTML = head + body;
+        }
+
+        function formatCell(value, key) {
+            if (key === 'cost_usd') return money(value);
+            if (typeof value === "number") return format(value);
+            if (value === null || value === undefined) return "-";
+            return String(value);
+        }
+
+        // ==========================================
+        // 数据加载核心逻辑
+        // ==========================================
+        async function load() {
+            showError("");
+            const refreshBtn = document.querySelector("#refresh");
+            refreshBtn.classList.add("opacity-50", "pointer-events-none");
+            var icon = refreshBtn.querySelector('svg') || refreshBtn.querySelector('i');
+            if (icon) icon.classList.add("animate-spin");
+
+            const range = document.querySelector("#range").value;
+            try {
+                const [summary, models, sources, recent] = await Promise.all([
+                    api("/api/summary?range=" + range),
+                    api("/api/by-model?range=" + range),
+                    api("/api/by-source?range=" + range),
+                    api("/api/recent?limit=50")
+                ]);
+
+                renderMetrics(summary);
+
+                const groupedColumns = [
+                    { key: "name", label: "名称" },
+                    { key: "requests", label: "请求数", align: "right" },
+                    { key: "input_tokens", label: "输入", align: "right" },
+                    { key: "output_tokens", label: "输出", align: "right" },
+                    { key: "total_tokens", label: "总计", align: "right" },
+                    { key: "cost_usd", label: "产生费用", align: "right" }
+                ];
+
+                renderTable("#models", groupedColumns, models);
+                renderTable("#sources", groupedColumns, sources);
+
+                renderTable("#recent", [
+                    { key: "timestamp", label: "时间" },
+                    { key: "source", label: "调用来源" },
+                    { key: "model", label: "请求模型" },
+                    { key: "success", label: "状态" },
+                    { key: "total_tokens", label: "Tokens", align: "right" },
+                    { key: "latency_ms", label: "耗时 (ms)", align: "right" }
+                ], recent);
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                refreshBtn.classList.remove("opacity-50", "pointer-events-none");
+                icon = refreshBtn.querySelector('svg') || refreshBtn.querySelector('i');
+                if (icon) icon.classList.remove("animate-spin");
+            }
+        }
+
+        document.querySelector("#refresh").addEventListener("click", load);
+        document.querySelector("#range").addEventListener("change", load);
+        document.querySelector("#collect").addEventListener("click", async (e) => {
+            const btn = e.currentTarget;
+            btn.classList.add("opacity-50", "pointer-events-none");
+            try {
+                await api("/api/collect", { method: "POST" });
+                await load();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                btn.classList.remove("opacity-50", "pointer-events-none");
+            }
+        });
+
+        // 初次加载
+        load();
+    </script>
 </body>
 </html>`;
 }
