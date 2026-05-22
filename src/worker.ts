@@ -388,421 +388,450 @@ function corsHeaders(): HeadersInit {
   };
 }
 
+
 function renderDashboard(): string {
-  return `<!doctype html>
-<html lang="zh-CN" data-theme="dark">
+  return `<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CPA Usage Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"><\/script>
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Avenir Next', 'Gill Sans', 'Trebuchet MS', 'sans-serif'],
-            serif: ['ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
-            mono: ['SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Roboto Mono', 'monospace']
-          },
-          colors: {
-            paper: { DEFAULT: '#F9F6F0', strong: '#FDF8F1', dark: '#141413', 'dark-strong': '#1E1E1E' },
-            ink: { DEFAULT: '#191919', muted: '#6F6156', dark: '#E6E6E6', 'dark-muted': '#A3A3A3' },
-            terra: { DEFAULT: '#DA7756', light: '#E8936F', dark: '#C96442' },
-            teal: { DEFAULT: '#2E6F5E', light: '#3D8F7A' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPA Analytics - Gemini Style</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 图标 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Outfit 带来类似 Google Sans 的现代几何感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gemini: {
+                            bg: '#131314',
+                            surface: '#1e1f20',
+                            surfaceHover: '#282a2c',
+                            text: '#e3e3e3',
+                            textSecondary: '#c4c7c5',
+                            border: '#333538'
+                        }
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 10s ease infinite',
+                        'sparkle': 'sparkle 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        'sparkle': {
+                            '0%, 100%': { transform: 'scale(1) rotate(0deg)', opacity: 1 },
+                            '50%': { transform: 'scale(1.1) rotate(5deg)', opacity: 0.8 },
+                        }
+                    }
+                }
+            }
         }
-      }
-    }
-  <\/script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #141413;
-      color: #E6E6E6;
-      font-family: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', serif;
-      line-height: 1.6;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
-      background-size: 20px 20px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    body > div { position: relative; z-index: 1; }
+    </script>
+    <style>
+        body {
+            background-color: #131314;
+            color: #e3e3e3;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-    .card {
-      background: #1E1E1E;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 0.625rem;
-      transition: all 0.2s ease;
-    }
-    .card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
+        /* 隐藏滚动条但保留功能，类似原生App */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333538; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4d51; }
 
-    .stat-card { position: relative; overflow: hidden; transition: all 0.2s ease; }
-    .stat-card:hover { transform: translateY(-1px); }
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent-color, #DA7756), transparent);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .stat-card:hover::after { opacity: 1; }
+        /* Gemini 标志性的文字渐变 */
+        .gemini-gradient-text {
+            background: linear-gradient(74deg, #4285f4 0, #9b72cb 46%, #d96570 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
 
-    .btn-primary {
-      background: #DA7756;
-      color: #F9F6F0;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-weight: 500;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      letter-spacing: 0.01em;
-    }
-    .btn-primary:hover { background: #C96442; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(218,119,86,0.25); }
-    .btn-primary:active { transform: scale(0.98); }
+        .gemini-gradient-bg {
+            background: linear-gradient(74deg, #4285f4 0, #9b72cb 46%, #d96570 100%);
+        }
 
-    .btn-secondary {
-      background: transparent;
-      color: #A3A3A3;
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-weight: 500;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,0.05); color: #E6E6E6; border-color: rgba(255,255,255,0.2); }
+        /* 顶部微妙的环境光 */
+        .ambient-light {
+            position: fixed;
+            top: -20vh;
+            left: 10vw;
+            width: 80vw;
+            height: 40vh;
+            background: radial-gradient(ellipse at center, rgba(155, 114, 203, 0.15) 0%, rgba(19, 19, 20, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
-    select, input[type="password"] {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #E6E6E6;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-size: 13px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    select:focus, input[type="password"]:focus {
-      border-color: #DA7756;
-      box-shadow: 0 0 0 2px rgba(218,119,86,0.15);
-    }
-    select { appearance: none; cursor: pointer; }
+        /* Gemini 风格的卡片：大圆角，极简背景，无明显边框 */
+        .gemini-card {
+            background-color: #1e1f20;
+            border-radius: 24px;
+            transition: background-color 0.2s ease;
+        }
+        .gemini-card:hover {
+            background-color: #282a2c;
+        }
 
-    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-    th {
-      color: #A3A3A3;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    td {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      white-space: nowrap;
-      color: #E6E6E6;
-    }
-    tr:hover td { background: rgba(255,255,255,0.02); }
+        /* Gemini 输入框风格（药丸形状，深灰底色） */
+        .gemini-input {
+            background-color: #1e1f20;
+            border: 1px solid transparent;
+            color: #e3e3e3;
+            border-radius: 9999px; /* pill shape */
+            transition: all 0.2s ease;
+        }
+        .gemini-input:focus-within {
+            background-color: #282a2c;
+        }
+        select option { background: #1e1f20; color: #e3e3e3; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-    .badge-success { background: rgba(46,111,94,0.2); color: #3D8F7A; }
-    .badge-error { background: rgba(218,119,86,0.15); color: #E8936F; }
-    .badge-neutral { background: rgba(163,163,163,0.1); color: #A3A3A3; }
+        /* 表格样式重写 */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th {
+            color: #c4c7c5;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 16px;
+            border-bottom: 1px solid #333538;
+            text-align: left;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(51, 53, 56, 0.5);
+            font-size: 0.9rem;
+        }
+        tbody tr { transition: background-color 0.2s ease; }
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        tbody tr:last-child td { border-bottom: none; }
 
-    .error-toast {
-      background: rgba(218,119,86,0.08);
-      border: 1px solid rgba(218,119,86,0.2);
-      color: #E8936F;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-    }
-
-    .section-title {
-      font-family: 'Avenir Next', Gill Sans, Trebuchet MS, sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      color: #E6E6E6;
-      letter-spacing: -0.01em;
-    }
-
-    @keyframes shimmer {
-      0%, 100% { opacity: 0.35; }
-      50% { opacity: 0.85; }
-    }
-    .shimmer { animation: shimmer 2s ease-in-out infinite; }
-
-    .fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    @media (max-width: 768px) {
-      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      .toolbar { flex-direction: column; align-items: stretch !important; }
-    }
-  </style>
+        /* 状态指示器小圆点 */
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+    </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+<body class="antialiased min-h-screen flex flex-col font-sans selection:bg-[#9b72cb] selection:text-white">
 
-    <!-- Header -->
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-      <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-terra/15 flex items-center justify-center">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DA7756" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+    <!-- 顶部环境光 -->
+    <div class="ambient-light"></div>
+
+    <!-- 导航与控制栏 -->
+    <header class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 z-10">
+
+        <!-- Logo / 标题区 -->
+        <div class="flex items-center gap-3">
+            <div class="animate-sparkle">
+                <i data-lucide="sparkles" class="w-8 h-8" style="color: #a47cf6;"></i>
+            </div>
+            <h1 class="text-3xl font-medium tracking-tight">
+                <span class="gemini-gradient-text animate-gradient-x">CPA Analytics</span>
+            </h1>
         </div>
-        <div>
-          <h1 class="text-lg font-semibold tracking-tight" style="font-family:'Avenir Next',Gill Sans,sans-serif;color:#E6E6E6;">CPA Usage</h1>
-          <p class="text-xs" style="color:#A3A3A3;font-family:'Avenir Next',Gill Sans,sans-serif;">CLIProxyAPI 用量统计</p>
+
+        <!-- Gemini 风格工具栏 -->
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <!-- 下拉选择 (Pill) -->
+            <div class="relative gemini-input flex items-center px-4 py-2 hover:bg-[#282a2c] cursor-pointer">
+                <select id="range" class="appearance-none bg-transparent outline-none text-sm font-medium pr-6 cursor-pointer w-full h-full text-gemini-textSecondary">
+                    <option value="24h">24 小时</option>
+                    <option value="7d" selected>7 天</option>
+                    <option value="30d">30 天</option>
+                    <option value="all">全部时间</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gemini-textSecondary absolute right-4 pointer-events-none"></i>
+            </div>
+
+            <!-- Token 输入 (Pill) -->
+            <div class="relative flex-1 md:w-56 gemini-input flex items-center px-4 py-2 hover:bg-[#282a2c]">
+                <i data-lucide="key" class="w-4 h-4 text-gemini-textSecondary shrink-0 mr-2"></i>
+                <input id="token" type="password" placeholder="输入面板 Token" class="bg-transparent outline-none w-full text-sm text-gemini-text placeholder-gemini-textSecondary">
+            </div>
+
+            <!-- 操作按钮 (Pill) -->
+            <button id="refresh" class="gemini-input px-5 py-2 flex items-center justify-center hover:bg-[#282a2c] transition-colors group">
+                <i data-lucide="rotate-cw" class="w-4 h-4 text-gemini-textSecondary group-hover:text-white transition-colors"></i>
+            </button>
+
+            <!-- 主色调按钮 -->
+            <button id="collect" class="gemini-gradient-bg px-6 py-2 rounded-full text-white text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg shadow-[#9b72cb]/20 active:scale-95">
+                <i data-lucide="zap" class="w-4 h-4 fill-white/20"></i>
+                <span>立即采集</span>
+            </button>
         </div>
-      </div>
-      <div class="toolbar flex items-center gap-2 flex-wrap">
-        <select id="range" class="min-w-[90px]">
-          <option value="1h">1 小时</option>
-          <option value="24h">24 小时</option>
-          <option value="7d" selected>7 天</option>
-          <option value="30d">30 天</option>
-          <option value="90d">90 天</option>
-          <option value="all">全部</option>
-        </select>
-        <input id="token" type="password" placeholder="面板令牌" class="w-36">
-        <button id="refresh" class="btn-secondary flex items-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-          刷新
-        </button>
-        <button id="collect" class="btn-primary flex items-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          采集
-        </button>
-      </div>
     </header>
 
-    <!-- Error -->
-    <div id="error" class="error-toast mb-5 hidden"></div>
+    <!-- 主内容区 -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pb-12 space-y-6 z-10">
 
-    <!-- Loading -->
-    <div id="loading" class="hidden text-center py-16">
-      <div class="shimmer mx-auto mb-4 w-8 h-8 rounded-full border-2 border-terra/30 border-t-terra"></div>
-      <p class="text-sm" style="color:#A3A3A3;font-family:'Avenir Next',Gill Sans,sans-serif;">加载中...</p>
-    </div>
-
-    <!-- Stats -->
-    <div id="metrics" class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
-
-    <!-- Model & Source Tables -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-      <div class="card p-5 fade-in">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="section-title">按模型</h2>
-          <span class="badge badge-neutral" id="model-count">0</span>
+        <!-- 错误提示 -->
+        <div id="error" class="hidden w-full p-4 rounded-2xl bg-red-500/10 text-red-400 text-sm flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+            <span id="error-text"></span>
         </div>
-        <div class="overflow-x-auto"><table id="models"></table></div>
-      </div>
-      <div class="card p-5 fade-in">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="section-title">按来源</h2>
-          <span class="badge badge-neutral" id="source-count">0</span>
+
+        <!-- 欢迎语 (Gemini 标志性大标题) -->
+        <div class="py-4">
+            <h2 class="text-4xl font-medium gemini-gradient-text animate-gradient-x inline-block mb-2">Hello, Admin</h2>
+            <p class="text-gemini-textSecondary text-lg">以下是您最近的 API 调用使用情况。</p>
         </div>
-        <div class="overflow-x-auto"><table id="sources"></table></div>
-      </div>
-    </div>
 
-    <!-- Recent Events -->
-    <div class="card p-5 fade-in">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="section-title">最近请求</h2>
-        <span class="badge badge-neutral" id="recent-count">0</span>
-      </div>
-      <div class="overflow-x-auto"><table id="recent"></table></div>
-    </div>
-  </div>
+        <!-- 核心指标网格 -->
+        <div id="metrics" class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+            <!-- JS 动态注入 -->
+        </div>
 
-  <script>
-    var $ = function(s) { return document.querySelector(s); };
-    var tokenInput = $("#token");
-    var savedToken = localStorage.getItem("dashboardToken");
-    if (savedToken) tokenInput.value = savedToken;
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-2">
+            <!-- 按模型 -->
+            <section class="gemini-card p-6 flex flex-col h-full">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <i data-lucide="box" class="w-5 h-5 text-[#9b72cb]"></i>
+                    <h2 class="text-lg font-medium text-white">按模型</h2>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table id="models" class="w-full text-left whitespace-nowrap"></table>
+                </div>
+            </section>
 
-    function getHeaders() {
-      var token = tokenInput.value.trim();
-      if (token) localStorage.setItem("dashboardToken", token);
-      return token ? { authorization: "Bearer " + token } : {};
-    }
+            <!-- 按来源 -->
+            <section class="gemini-card p-6 flex flex-col h-full">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <i data-lucide="globe-2" class="w-5 h-5 text-[#4285f4]"></i>
+                    <h2 class="text-lg font-medium text-white">按来源</h2>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table id="sources" class="w-full text-left whitespace-nowrap"></table>
+                </div>
+            </section>
+        </div>
 
-    function api(path, options) {
-      options = options || {};
-      return fetch(path, { method: options.method, headers: Object.assign({}, getHeaders(), options.headers || {}) })
-        .then(function(res) {
-          return res.json().then(function(data) {
-            if (!res.ok) throw new Error(data.error || res.statusText);
+        <!-- 最近请求 -->
+        <section class="gemini-card p-6">
+            <div class="flex items-center gap-3 mb-4 px-2">
+                <i data-lucide="history" class="w-5 h-5 text-[#d96570]"></i>
+                <h2 class="text-lg font-medium text-white">最近请求记录</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="recent" class="w-full text-left whitespace-nowrap"></table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 核心逻辑脚本 -->
+    <script>
+        // 初始化静态图标
+        lucide.createIcons();
+
+        const tokenInput = document.querySelector("#token");
+        const savedToken = localStorage.getItem("dashboardToken");
+        if (savedToken) tokenInput.value = savedToken;
+
+        function headers() {
+            const token = tokenInput.value.trim();
+            if (token) localStorage.setItem("dashboardToken", token);
+            return token ? { authorization: "Bearer " + token } : {};
+        }
+
+        async function api(path, options = {}) {
+            const response = await fetch(path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || response.statusText);
             return data;
-          });
+        }
+
+        function format(value) {
+            return new Intl.NumberFormat().format(Number(value || 0));
+        }
+
+        function money(value) {
+            return "\$" + Number(value || 0).toFixed(4);
+        }
+
+        function formatLabel(value) {
+            return typeof value === "number" ? format(value) : String(value ?? 0);
+        }
+
+        function showError(msg) {
+            const errDiv = document.querySelector("#error");
+            const errText = document.querySelector("#error-text");
+            if (msg) {
+                errText.textContent = msg;
+                errDiv.classList.remove("hidden");
+            } else {
+                errDiv.classList.add("hidden");
+                errText.textContent = "";
+            }
+        }
+
+        // ==========================================
+        // UI 渲染逻辑增强：Gemini 风格的指标卡片
+        // ==========================================
+        function renderMetrics(summary) {
+            const items = [
+                { label: "请求总数", value: summary.requests, icon: "activity", desc: "API Calls" },
+                { label: "总 Tokens", value: summary.total_tokens, icon: "coins", desc: "Total Used" },
+                { label: "输入 Tokens", value: summary.input_tokens, icon: "corner-right-down", desc: "Prompt" },
+                { label: "输出 Tokens", value: summary.output_tokens, icon: "corner-right-up", desc: "Completion" },
+                { label: "失败请求", value: summary.failed_requests, icon: "alert-triangle", desc: "Errors" },
+                { label: "总费用", value: money(summary.cost_usd), icon: "badge-dollar-sign", desc: "Estimated" },
+                { label: "平均延迟", value: (summary.avg_latency_ms || 0) + " ms", icon: "timer", desc: "Speed" },
+                { label: "缓存 Tokens", value: summary.cached_tokens, icon: "hard-drive", desc: "Saved" }
+            ];
+
+            const html = items.map(item => '<div class="gemini-card p-5 sm:p-6 flex flex-col justify-between min-h-[120px] group cursor-default relative overflow-hidden">'
+                + '<div class="flex justify-between items-start mb-4">'
+                + '<div class="flex flex-col">'
+                + '<span class="text-gemini-text text-sm font-medium">' + item.label + '</span>'
+                + '<span class="text-gemini-textSecondary text-[11px] uppercase tracking-wider mt-0.5">' + item.desc + '</span>'
+                + '</div>'
+                + '<i data-lucide="' + item.icon + '" class="w-4 h-4 text-gemini-textSecondary group-hover:text-[#9b72cb] transition-colors"></i>'
+                + '</div>'
+                + '<strong class="text-2xl sm:text-3xl font-light font-mono text-white truncate' + (item.label === "失败请求" && item.value > 0 ? ' !text-red-400 font-medium' : '') + '">'
+                + (item.label === "总费用" ? item.value : formatLabel(item.value))
+                + '</strong>'
+                + '</div>'
+            ).join("");
+
+            document.querySelector("#metrics").innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // UI 渲染逻辑增强：Gemini 风格干净的表格
+        // ==========================================
+        function renderTable(selector, columns, rows) {
+            var head = "<thead><tr>" + columns.map(function(column) {
+                return '<th class="' + (column.align === 'right' ? 'text-right' : 'text-left') + '">' + column.label + '</th>';
+            }).join("") + "</tr></thead>";
+
+            var body = "<tbody>" + rows.map(function(row) {
+                return "<tr>" + columns.map(function(column) {
+                    var cellValue = row[column.key];
+                    var displayValue = formatCell(cellValue, column.key);
+                    var tdClass = column.align === 'right' ? 'text-right' : 'text-left';
+
+                    if (column.key === 'success') {
+                        var isSuccess = cellValue === true || cellValue === 1 || cellValue === 'true';
+                        displayValue = isSuccess
+                            ? '<div class="flex items-center gap-2"><span class="status-dot bg-green-500"></span><span class="text-gemini-textSecondary">成功</span></div>'
+                            : '<div class="flex items-center gap-2"><span class="status-dot bg-red-500"></span><span class="text-red-400">失败</span></div>';
+                    } else if (column.key === 'cost_usd' || column.label === '费用') {
+                        displayValue = '<span class="text-gemini-text font-mono">' + displayValue + '</span>';
+                    } else if (column.key === 'name' || column.key === 'model') {
+                        displayValue = '<span class="text-white font-medium">' + displayValue + '</span>';
+                    } else if (column.key === 'source') {
+                        displayValue = '<span class="bg-[#282a2c] px-2.5 py-1 rounded-md text-xs text-gemini-textSecondary border border-[#333538]">' + displayValue + '</span>';
+                    } else if (typeof cellValue === 'number') {
+                        displayValue = '<span class="font-mono text-gemini-textSecondary">' + displayValue + '</span>';
+                    } else {
+                        displayValue = '<span class="text-gemini-textSecondary">' + displayValue + '</span>';
+                    }
+
+                    return '<td class="' + tdClass + '">' + displayValue + '</td>';
+                }).join("") + "</tr>";
+            }).join("") + "</tbody>";
+
+            document.querySelector(selector).innerHTML = head + body;
+        }
+
+        function formatCell(value, key) {
+            if (key === 'cost_usd') return money(value);
+            if (typeof value === "number") return format(value);
+            if (value === null || value === undefined) return "-";
+            return String(value);
+        }
+
+        // ==========================================
+        // 数据加载核心逻辑
+        // ==========================================
+        async function load() {
+            showError("");
+            const refreshBtn = document.querySelector("#refresh");
+            refreshBtn.classList.add("opacity-50", "pointer-events-none");
+            var icon = refreshBtn.querySelector('svg') || refreshBtn.querySelector('i');
+            if (icon) icon.classList.add("animate-spin");
+
+            const range = document.querySelector("#range").value;
+            try {
+                const [summary, models, sources, recent] = await Promise.all([
+                    api("/api/summary?range=" + range),
+                    api("/api/by-model?range=" + range),
+                    api("/api/by-source?range=" + range),
+                    api("/api/recent?limit=50")
+                ]);
+
+                renderMetrics(summary);
+
+                const groupedColumns = [
+                    { key: "name", label: "名称" },
+                    { key: "requests", label: "请求数", align: "right" },
+                    { key: "input_tokens", label: "输入", align: "right" },
+                    { key: "output_tokens", label: "输出", align: "right" },
+                    { key: "total_tokens", label: "总计", align: "right" },
+                    { key: "cost_usd", label: "产生费用", align: "right" }
+                ];
+
+                renderTable("#models", groupedColumns, models);
+                renderTable("#sources", groupedColumns, sources);
+
+                renderTable("#recent", [
+                    { key: "timestamp", label: "时间" },
+                    { key: "source", label: "调用来源" },
+                    { key: "model", label: "请求模型" },
+                    { key: "success", label: "状态" },
+                    { key: "total_tokens", label: "Tokens", align: "right" },
+                    { key: "latency_ms", label: "耗时 (ms)", align: "right" }
+                ], recent);
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                refreshBtn.classList.remove("opacity-50", "pointer-events-none");
+                icon = refreshBtn.querySelector('svg') || refreshBtn.querySelector('i');
+                if (icon) icon.classList.remove("animate-spin");
+            }
+        }
+
+        document.querySelector("#refresh").addEventListener("click", load);
+        document.querySelector("#range").addEventListener("change", load);
+        document.querySelector("#collect").addEventListener("click", async (e) => {
+            const btn = e.currentTarget;
+            btn.classList.add("opacity-50", "pointer-events-none");
+            try {
+                await api("/api/collect", { method: "POST" });
+                await load();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                btn.classList.remove("opacity-50", "pointer-events-none");
+            }
         });
-    }
 
-    function fmt(n) { return new Intl.NumberFormat().format(Number(n || 0)); }
-    function money(n) { return "$" + Number(n || 0).toFixed(4); }
-
-    function icon(name) {
-      var icons = {
-        requests: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
-        tokens: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M8 10h8"/></svg>',
-        input: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>',
-        output: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
-        cost: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-        latency: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-        cache: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
-        error: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
-      };
-      return icons[name] || '';
-    }
-
-    function statCard(label, value, accentVar, iconKey) {
-      return '<div class="stat-card card p-4 fade-in" style="--accent-color:' + accentVar + '">' +
-        '<div class="flex items-center gap-2 mb-2.5">' +
-          '<span style="color:' + accentVar + '">' + icon(iconKey) + '</span>' +
-          '<span class="text-xs font-medium uppercase tracking-wider" style="color:#A3A3A3;font-family:Avenir Next,Gill Sans,sans-serif;">' + label + '</span>' +
-        '</div>' +
-        '<div class="text-xl font-semibold" style="color:#E6E6E6;font-family:Avenir Next,Gill Sans,sans-serif;">' + value + '</div>' +
-      '</div>';
-    }
-
-    function renderMetrics(s) {
-      $("#metrics").innerHTML = [
-        statCard("请求数", fmt(s.requests), "#DA7756", "requests"),
-        statCard("总 Tokens", fmt(s.total_tokens), "#E8936F", "tokens"),
-        statCard("费用", money(s.cost_usd), "#2E6F5E", "cost"),
-        statCard("平均延迟", Math.round(s.avg_latency_ms || 0) + " ms", "#A3A3A3", "latency"),
-        statCard("输入 Tokens", fmt(s.input_tokens), "#DA7756", "input"),
-        statCard("输出 Tokens", fmt(s.output_tokens), "#E8936F", "output"),
-        statCard("缓存 Tokens", fmt(s.cached_tokens), "#A3A3A3", "cache"),
-        statCard("失败数", fmt(s.failed_requests), "#C96442", "error")
-      ].join("");
-    }
-
-    function statusBadge(value) {
-      return value == 1
-        ? '<span class="badge badge-success"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3D8F7A;"></span> 成功</span>'
-        : '<span class="badge badge-error"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#E8936F;"></span> 失败</span>';
-    }
-
-    function renderTable(sel, columns, rows, countId) {
-      if (countId) $(countId).textContent = rows.length;
-      if (!rows.length) {
-        $(sel).innerHTML = '<tbody><tr><td colspan="' + columns.length + '" style="text-align:center;color:#A3A3A3;padding:32px 14px;font-style:italic;">暂无数据</td></tr></tbody>';
-        return;
-      }
-      var head = "<thead><tr>" + columns.map(function(c) { return "<th>" + c.label + "</th>"; }).join("") + "</tr></thead>";
-      var body = "<tbody>" + rows.map(function(row) {
-        return "<tr>" + columns.map(function(c) {
-          if (c.format === "time") return '<td style="color:#A3A3A3;font-family:ui-monospace,monospace;font-size:12px;">' + formatTime(row[c.key]) + "</td>";
-          if (c.key === "success") return "<td>" + statusBadge(row[c.key]) + "</td>";
-          if (c.key === "cost_usd") return '<td style="color:#3D8F7A;font-weight:500;">' + money(row[c.key]) + "</td>";
-          if (c.key === "latency_ms") return '<td style="color:#A3A3A3;font-family:ui-monospace,monospace;font-size:12px;">' + fmt(row[c.key]) + " ms</td>";
-          if (c.key === "total_tokens") return '<td style="font-weight:500;">' + fmt(row[c.key]) + "</td>";
-          return "<td>" + formatCell(row[c.key]) + "</td>";
-        }).join("") + "</tr>";
-      }).join("") + "</tbody>";
-      $(sel).innerHTML = head + body;
-    }
-
-    function formatCell(v) {
-      if (typeof v === "number") return fmt(v);
-      if (v === null || v === undefined) return '<span style="color:#6F6156;">—</span>';
-      return String(v);
-    }
-
-    function formatTime(iso) {
-      if (!iso) return '—';
-      var d = new Date(iso);
-      if (isNaN(d)) return iso;
-      var pad = function(n) { return String(n).padStart(2, '0'); };
-      return pad(d.getMonth()+1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-    }
-
-    function showError(msg) {
-      var el = $("#error");
-      if (msg) { el.textContent = msg; el.classList.remove("hidden"); }
-      else { el.textContent = ""; el.classList.add("hidden"); }
-    }
-
-    function load() {
-      showError("");
-      $("#loading").classList.remove("hidden");
-      var range = $("#range").value;
-      Promise.all([
-        api("/api/summary?range=" + range),
-        api("/api/by-model?range=" + range),
-        api("/api/by-source?range=" + range),
-        api("/api/recent?limit=50")
-      ]).then(function(results) {
-        var summary = results[0], models = results[1], sources = results[2], recent = results[3];
-        renderMetrics(summary);
-        var groupedCols = [
-          { key: "name", label: "名称" },
-          { key: "requests", label: "请求" },
-          { key: "input_tokens", label: "输入" },
-          { key: "output_tokens", label: "输出" },
-          { key: "total_tokens", label: "总量" },
-          { key: "cost_usd", label: "费用" }
-        ];
-        renderTable("#models", groupedCols, models, "#model-count");
-        renderTable("#sources", groupedCols, sources, "#source-count");
-        renderTable("#recent", [
-          { key: "timestamp", label: "时间", format: "time" },
-          { key: "source", label: "来源" },
-          { key: "model", label: "模型" },
-          { key: "success", label: "状态" },
-          { key: "total_tokens", label: "Tokens" },
-          { key: "latency_ms", label: "延迟" }
-        ], recent, "#recent-count");
-      }).catch(function(e) { showError(e.message); })
-      .then(function() { $("#loading").classList.add("hidden"); });
-    }
-
-    $("#refresh").addEventListener("click", load);
-    $("#range").addEventListener("change", load);
-    $("#collect").addEventListener("click", function() {
-      api("/api/collect", { method: "POST" }).then(function() { return load(); }).catch(function(e) { showError(e.message); });
-    });
-    load();
-  <\/script>
+        // 初次加载
+        load();
+    </script>
 </body>
 </html>`;
 }
